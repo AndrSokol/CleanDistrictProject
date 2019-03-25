@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.persistence.*;
 
+import org.hibernate.annotations.BatchSize;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,6 +23,7 @@ public class UserEntity {
     private String firstName;
     private String lastName;
 
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "user")
     private List<ContactEntity> contactList;
 

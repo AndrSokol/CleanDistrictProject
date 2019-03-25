@@ -2,10 +2,15 @@ package com.sokol.cleandistrict.cleandistrict.entity;
 
 import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@NoArgsConstructor
 @Table(name = "comment")
+@Getter
+@Setter
 public class CommentEntity {
 
     @Id

@@ -1,23 +1,26 @@
 package com.sokol.cleandistrict.cleandistrict.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sokol.cleandistrict.cleandistrict.convertor.UserConvertor;
+import com.sokol.cleandistrict.cleandistrict.convertor.UserConverter;
 import com.sokol.cleandistrict.cleandistrict.entity.ContactEntity;
 import com.sokol.cleandistrict.cleandistrict.entity.UserEntity;
 import com.sokol.cleandistrict.cleandistrict.exception.UserNotFoundException;
+import com.sokol.cleandistrict.cleandistrict.mapper.UserMapper;
 import com.sokol.cleandistrict.cleandistrict.model.Contact;
 import com.sokol.cleandistrict.cleandistrict.model.User;
 import com.sokol.cleandistrict.cleandistrict.repository.ContactRepository;
 import com.sokol.cleandistrict.cleandistrict.repository.UserRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
-public class UserService{
+public class UserService {
 
     @Autowired
     private UserRepository userRepository;
@@ -26,12 +29,11 @@ public class UserService{
     private ContactRepository contactRepository;
 
     @Autowired
-    private UserConvertor userConvertor;
+    private UserConverter userConverter;
 
     public List<User> getAll() {
-        List<User> users = userConvertor.getUsers(userRepository.findAll());
-
-        return users;
+        log.info("Retrieving all users");
+        return userConverter.getUsers(userRepository.findAll());
     }
 
     public User getById(int id) {
@@ -39,42 +41,36 @@ public class UserService{
     }
 
     private User getUser(int id) {
+        log.info(String.format("Retrieving user with id=%s", id));
         Optional<UserEntity> userEntity = userRepository.findById(id);
-        if(! userEntity.isPresent()){
+        if (!userEntity.isPresent()) {
             throw new UserNotFoundException(String.format("User with id=%s not found", id));
         }
 
-        return userConvertor.getUser(userEntity.get());
+        return userConverter.getUser(userEntity.get());
     }
 
     public User createUser(User user) {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setFirstName(user.getFirstName());
-        userEntity.setLastName(user.getLastName());
+        log.info(String.format("Creation user: %s", user));
+        UserEntity userEntity = UserMapper.INSTANCE.userToUserEntity(user);
 
-        User savedUser = userConvertor.getUser(userRepository.save(userEntity));
-        return savedUser;
+        return userConverter.getUser(userRepository.save(userEntity));
     }
 
     public Contact createContactForUser(int id, Contact contact) {
-        User user = getUser(id);
-
-        UserEntity userEntity = new UserEntity();
-        userEntity.setLastName(user.getLastName());
-        userEntity.setLastName(user.getLastName());
-        userEntity.setId(user.getId());
+        log.info(String.format("Creation contact for user_id=%s. Contact info: %s", id, contact));
+        UserEntity userEntity = UserMapper.INSTANCE.userToUserEntity(getUser(id));
 
         ContactEntity contactEntity = new ContactEntity();
         contactEntity.setValue(contact.getValue());
         contactEntity.setUser(userEntity);
         contactEntity.setType(contact.getType());
 
-        return userConvertor.getContact(contactRepository.save(contactEntity));
+        return userConverter.getContact(contactRepository.save(contactEntity));
     }
 
     public List<Contact> getContactsForUser(int id) {
-        List<Contact> contacts = getUser(id).getContactList();
-
-        return contacts;
+        log.info(String.format("Getting contacts for user_id=%s", id));
+        return getUser(id).getContactList();
     }
 }

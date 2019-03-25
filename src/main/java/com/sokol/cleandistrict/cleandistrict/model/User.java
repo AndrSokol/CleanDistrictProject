@@ -14,7 +14,6 @@ public class User {
     private String firstName;
     private String lastName;
     private List<Contact> contactList;
-//    private List<SocialNetwork> socialNetworkList;
 
     public User() {
     }
